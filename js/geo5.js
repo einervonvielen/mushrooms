@@ -1,4 +1,4 @@
-var version = "Version 2014-10-18, GPLv3";
+var version = "Version 2015-07-19, GPLv3";
 //-------------------
 //-- Docu messages --
 //
@@ -282,6 +282,7 @@ var KEY_GROUP_MEMBER_TRACK_DISTANCE = 9;
 var bufferTrackPointsToDraw = "";
 var KEY_BROWSER_BUFFER_TRACK_POINTS_TO_DRAW = "browser_track_today";
 var bufferTrackPointsToSend = "";  // make sure that this is not deleted befor it was sent
+var arrayBufferTrackPointsToSend = new Array();
 //key for local storage to store the browser track for restarts of the browser
 var KEY_BROWSER_BUFFER_TRACK_POINTS_TO_SEND = "browser_track_to_send";
 var bufferTrackPointsOnTheWayToServer = ""; // this is the part of the track that is just on the way to the server
@@ -333,6 +334,17 @@ function startApp() {
 	restoreSettings();
 	// Get track points that where not sent yes and try to send them again
 	bufferTrackPointsToSend = getItemFromlocalStorage(KEY_BROWSER_BUFFER_TRACK_POINTS_TO_SEND);
+	
+	// Fill array
+	if(! isEmptyString(bufferTrackPointsToSend)) {
+		arrayBufferTrackPointsToSend = new Array();
+		var bufPoints = bufferTrackPointsToSend.split("\n");
+		var pointCount = bufferTrackPointsToSend.length;
+		for ( var i = 0; i < pointCount; i++) {
+			arrayBufferTrackPointsToSend.push(bufPoints[i]);
+		}
+	}
+	
 	drawStoredTrackAndPosition();
 	// Download the user data (position marker and track).
 	// This will get the positions and tracks of all group members too.
@@ -850,6 +862,7 @@ function clearPositionsTracksAndUsers() {
 	addItemToLocalStorage(KEY_BROWSER_BUFFER_TRACK_POINTS_TO_DRAW, "");
 	bufferTrackPointsToSend = "";
 	addItemToLocalStorage(KEY_BROWSER_BUFFER_TRACK_POINTS_TO_SEND, "");
+	arrayBufferTrackPointsToSend = new Array();
 }
 
 function clearAtStartUp() {
@@ -1610,7 +1623,24 @@ function xhrUploadPositions() {
     }
     // This can be a single position or a a track (if the user is recording a track)
     // We use to variables. Why? The browser might find new positions while sending the old position(s).
-	bufferTrackPointsOnTheWayToServer = bufferTrackPointsToSend;
+    
+    var pointCount = arrayBufferTrackPointsToSend.length;
+    if(pointCount > 0) {
+    	// Send just one singel point.
+    	// Why not to send all together as it was?
+    	// Tiis proved to be not save enough in praxis if:
+    	// - The connection was slow
+    	bufferTrackPointsOnTheWayToServer = arrayBufferTrackPointsToSend[0];
+    }
+    
+    // Make sure that every unsent track point gets sent even if the user
+    // deactivated the track in the mean time.
+    if(pointCount > 1) {
+		paramStoreTrack = "&track=true";
+    }
+    
+	// bufferTrackPointsOnTheWayToServer = bufferTrackPointsToSend;
+    
 	if (isEmptyString(bufferTrackPointsOnTheWayToServer)) {
 		// No new position / track points
 		xhrDownloadPositions();
@@ -1677,8 +1707,12 @@ function xhrHandleHttpResponse() {
 					updateTracks(httpResponseText);
 					setIsWaitingForServerResponse(false);
 				} else if (nextXHR == XHR_KEY_ACTION_UPLOADED_POSITIONS) {					
-					setSuccessfullUpload();		
-					xhrDownloadPositions();
+					var pointsStillLeft = setSuccessfullUpload();
+					if(pointsStillLeft > 0) {
+						xhrUploadPositions();
+					} else {
+						xhrDownloadPositions();
+					}
 				} else if (nextXHR == XHR_KEY_ACTION_REMOVE_USER) {
 					// remove all user related data in the browser, pass, group, tracks,
 					// positions, other users of group,...
@@ -2778,13 +2812,10 @@ function createInputsTracks() {
 	text += "Tracks <select name=\"trackDate\" id=\"trackDate\" size=\"1\"></select>";
 	text += " <a id=\"" + ID_DOWNLOAD + "\" target=\"_blank\"></a>";
 	// Show count of unsent way points
-	if(bufferTrackPointsToSend != "") {
-		var csvLines = bufferTrackPointsToSend.split("\n");
-		var length = csvLines.length;
-		if(length > 0) {
-			text += "<br/>";
-			text += "Way points not send yet: " + length;
-		}
+	var lenght = arrayBufferTrackPointsToSend.length;
+	if(lenght > 0) {
+		text += "<br/>";
+		text += "Way points not send yet: " + length;
 	}
 
 	return text;
@@ -3825,15 +3856,32 @@ function addTrackPointToDrawBuffer(csvLine) {
  * @param csvLine
  */
 function addTrackPointToSendBuffer(csvLine) {
+	if(isEmptyString(csvLine)) {
+		return;
+	}
 	var isStoreTrack = getValue(KEY_STORE_TRACK);
 	if (!isStoreTrack.match(/true/i)) {
 		// Overwrite the last position and return.
-		bufferTrackPointsToSend = csvLine;
+		
+		// Old methond. Included a bug btw beacuse it deletes the unsent track points.
+		// bufferTrackPointsToSend = csvLine;
+		
+		var l = arrayBufferTrackPointsToSend.length;
+		if(l > 0) {
+			arrayBufferTrackPointsToSend[l - 1] = csvLine;
+		} else {
+			arrayBufferTrackPointsToSend.push(csvLine);
+		}
 	} else {
+		arrayBufferTrackPointsToSend.push(csvLine);
+	}
+	bufferTrackPointsToSend = "";
+	var l = arrayBufferTrackPointsToSend.length;
+	for ( var i = 0; i < l; i++) {
 		if (bufferTrackPointsToSend != "") {
 			bufferTrackPointsToSend += "\n";
 		}
-		bufferTrackPointsToSend += csvLine;
+		bufferTrackPointsToSend += arrayBufferTrackPointsToSend[i];
 	}
 	addItemToLocalStorage(KEY_BROWSER_BUFFER_TRACK_POINTS_TO_SEND,
 			bufferTrackPointsToSend);
@@ -3845,11 +3893,17 @@ function addTrackPointToSendBuffer(csvLine) {
  */
 function setSuccessfullUpload() {
 	// Fill the buffer
-	if(bufferTrackPointsOnTheWayToServer == "") {
+	var pointsLeft = arrayBufferTrackPointsToSend.length;
+	if(pointsLeft < 1) {
 		// Might this ever happen? Who knows.
 		return;
 	}
+	
+	// Remove the track point from the buffer
+	arrayBufferTrackPointsToSend.shift();
+
 	var tempBuffer = "";
+	/*
 	var csvLines = bufferTrackPointsToSend.split("\n");
 	var length = csvLines.length;
 	for ( var i = 0; i < length; i++) {
@@ -3867,9 +3921,17 @@ function setSuccessfullUpload() {
 			tempBuffer += csvLine;
 		}
 	}
+	*/
+	pointsLeft = arrayBufferTrackPointsToSend.length;
+	for ( var i = 0; i < pointsLeft; i++) {
+		if(! isEmptyString(tempBuffer)) {
+			tempBuffer += "\n";
+		}
+		tempBuffer += arrayBufferTrackPointsToSend[i];
+	}
 	bufferTrackPointsToSend = tempBuffer;
-	addItemToLocalStorage(KEY_BROWSER_BUFFER_TRACK_POINTS_TO_SEND,
-			bufferTrackPointsToSend);
+	addItemToLocalStorage(KEY_BROWSER_BUFFER_TRACK_POINTS_TO_SEND, bufferTrackPointsToSend);
+	return pointsLeft;
 }
 
 function getLocalDateString(utcTimeStamp) {
@@ -4185,7 +4247,7 @@ function assert() {
 	} else if (testCounter == 2) {
 		// Check local storage
 		var found = getItemFromlocalStorage(KEY_BROWSER_BUFFER_TRACK_POINTS_TO_SEND);
-		if (found != "cc\ndd") {
+		if (found != "") {
 			testHasPassed = false;
 		}
 	} else if (testCounter == 6) {
@@ -4401,21 +4463,22 @@ function test_setSuccessfullUpload() {
 			}
 			setValue(KEY_STORE_TRACK, "false");
 			addTrackPointToSendBuffer("ee");
-			if (bufferTrackPointsToSend != "ee") {
+			if (bufferTrackPointsToSend != "aa\nee") {
 				break;
 			}
 			var found = getItemFromlocalStorage(KEY_BROWSER_BUFFER_TRACK_POINTS_TO_SEND);
-			if (bufferTrackPointsToSend != "ee") {
+			if (found != "aa\nee") {
 				break;
 			}
 			// Nothing was send (might this ever happen? Who knows.)
-			bufferTrackPointsOnTheWayToServer = "";
+			// bufferTrackPointsOnTheWayToServer = "";
 			setSuccessfullUpload();
 			if (bufferTrackPointsToSend != "ee") {
 				break;
 			}
 			// Send completed but buffer got new lines while sending
-			bufferTrackPointsOnTheWayToServer = "ee";
+			// bufferTrackPointsOnTheWayToServer = "ee";
+			addTrackPointToSendBuffer("dd");
 			setSuccessfullUpload();
 			if (bufferTrackPointsToSend != "") {
 				break;
@@ -4427,32 +4490,18 @@ function test_setSuccessfullUpload() {
 			if (bufferTrackPointsToSend != "aa\nbb") {
 				break;
 			}
-			// Nothing was send (might this ever happen? Who knows.)
-			bufferTrackPointsOnTheWayToServer = "";
-			setSuccessfullUpload();
-			if (bufferTrackPointsToSend != "aa\nbb") {
-				break;
-			}
-			// Send completed but buffer got new lines while sending
-			bufferTrackPointsOnTheWayToServer = "xx\naa";
 			setSuccessfullUpload();
 			if (bufferTrackPointsToSend != "bb") {
 				break;
 			}
-			// Send completed
-			bufferTrackPointsOnTheWayToServer = "bb";
+			// Send completed but buffer got new lines while sending
+			addTrackPointToSendBuffer("xx");
 			setSuccessfullUpload();
-			if (bufferTrackPointsToSend != "") {
+			if (bufferTrackPointsToSend != "xx") {
 				break;
 			}
-			addTrackPointToSendBuffer("aa");
-			addTrackPointToSendBuffer("bb");
-			addTrackPointToSendBuffer("cc");
-			addTrackPointToSendBuffer("dd");
-			// Sended a part of current buffer
-			bufferTrackPointsOnTheWayToServer = "aa\nbb";
 			setSuccessfullUpload();
-			if (bufferTrackPointsToSend != "cc\ndd") {
+			if (bufferTrackPointsToSend != "") {
 				break;
 			}
 		} else {
