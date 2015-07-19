@@ -3885,6 +3885,7 @@ function addTrackPointToSendBuffer(csvLine) {
 	}
 	addItemToLocalStorage(KEY_BROWSER_BUFFER_TRACK_POINTS_TO_SEND,
 			bufferTrackPointsToSend);
+	showPoinstUnsent();
 }
 
 /**
@@ -3931,7 +3932,17 @@ function setSuccessfullUpload() {
 	}
 	bufferTrackPointsToSend = tempBuffer;
 	addItemToLocalStorage(KEY_BROWSER_BUFFER_TRACK_POINTS_TO_SEND, bufferTrackPointsToSend);
+	showPoinstUnsent();
 	return pointsLeft;
+}
+
+function showPoinstUnsent() {
+	var pointsLeft = arrayBufferTrackPointsToSend.length;
+	if(pointsLeft > 0) {
+		showWarning("Points unsent " + pointsLeft)
+	} else {
+		clearMessages();
+	}
 }
 
 function getLocalDateString(utcTimeStamp) {
