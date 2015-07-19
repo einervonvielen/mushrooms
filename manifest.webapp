@@ -1,0 +1,31 @@
+{
+  "version": "0.1",
+  "name": "Pilze",
+  "description": "Mushrooms - Your friends live on a map",
+  "launch_path": "/geo5/", 
+  "installs_allowed_from": ["*"],
+  "icons": {
+    "16": "/icons/icon-16.png",
+    "48": "/icons/icon-48.png",
+    "128": "/icons/icon-128.png"
+  },
+  "developer": {
+    "name": "Tom Wiedenhoeft",
+    "url": "http://jfellow.net/"
+  },
+  "locales": {
+    "de": {
+      "description": "Mushrooms - Deine Freund live auf einer Landkarte",
+      "developer": {
+      "url": "http://jfellow.net/"
+      }
+    },
+    "ru": {
+      "description": "Mushrooms - твои друзья живьем на карте",
+      "developer": {
+      "url": "http://jfellow.net/"
+      }
+    }
+  },
+  "default_locale": "en"
+}
