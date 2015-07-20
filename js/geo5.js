@@ -1,4 +1,4 @@
-var version = "Version 2015-07-19, GPLv3";
+var version = "Version 2015-07-20, GPLv3";
 //-------------------
 //-- Docu messages --
 //
@@ -1362,12 +1362,26 @@ function isShareDue() {
 	return false;
 }
 
+function isXhrTimeout() {
+	var nowMilliseconds = Date.now();
+	// var nowMilliseconds = Date.getTime();
+	var intervall = getValue(KEY_INTERVALL_SERVER);
+	var threshold = timestampLastShareAttempt + xhrTimout;
+	if (nowMilliseconds > threshold) {
+		return true;
+	}
+	return false;
+}
+
 function share() {
 	if (!isPolling) {
 		return;
 	}
 	if (isWaitingForServerResponse) {
-		return;
+		// Check if timeout is xhrTimeout is reached. Lost connections proved to block sometimes
+		if(! isXhrTimeout()) {
+			return;
+		}
 	}
 	var isDue = isShareDue();
 	if(!isDue) {
@@ -1411,26 +1425,32 @@ function stopSharing() {
 
 function createXhr() {
 	if (window.XMLHttpRequest) {
-		if (typeof xhr === "undefined") {
-			// no variable "xhr" is defined in the current scope
-			// *or* some variable xhr exists and has been assigned the value undefined
-		} else {
-			// some variable (global or local) "v" is defined in the current scope
-			// *and* it contains a value other than undefined
-			try {
-				xhr.abort();
-			} catch(e) {
-				showWarning("XHR abort failed");
-				return false;
-			}
-	       
+		if(! abortXhr()) {
+			return false;
 		}
 		xhr = new XMLHttpRequest();
-		return true;
 	} else {
 		showWarning("Old browser? XHR not supported.");
 		return false;
 	}
+	return true;
+}
+
+function abortXhr() {
+	if (typeof xhr === "undefined") {
+		// no variable "xhr" is defined in the current scope
+		// *or* some variable xhr exists and has been assigned the value undefined
+	} else {
+		// some variable (global or local) "v" is defined in the current scope
+		// *and* it contains a value other than undefined
+		try {
+			xhr.abort();
+		} catch(e) {
+			showWarning("XHR abort failed");
+			return false;
+		}
+	}
+	return true;
 }
 
 /**
