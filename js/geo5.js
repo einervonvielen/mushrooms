@@ -1116,13 +1116,13 @@ function readPositionLine(line) {
 		var layerName = positionLayers[i].name;
 		if (lineUser == layerName) {
 			changePositionOnLayer(lineLon, lineLat, lineUser);
+			// Check it the existing track started yesterday
+			// If yes then remove. Why? The map displays only way points from today.
+			removeTrackIfFromYesterday(lineUser);
 			return true;
 		}
 	}
 	addPositionAsLayer(lineLon, lineLat, lineUser);
-	// Check it the existing track started yesterday
-	// If yes then remove. Why? The map displays only way points from today.
-	removeTrackIfFromYesterday(lineUser);
 	return true;
 }
 
