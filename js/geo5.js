@@ -286,6 +286,7 @@ var arrayBufferTrackPointsToSend = new Array();
 //key for local storage to store the browser track for restarts of the browser
 var KEY_BROWSER_BUFFER_TRACK_POINTS_TO_SEND = "browser_track_to_send";
 var bufferTrackPointsOnTheWayToServer = ""; // this is the part of the track that is just on the way to the server
+var csvLastGeoLocationToShare = ""; // Used for upload if nothing is in in the send buffer
 
 // XHR
 var xhr;
@@ -1651,6 +1652,19 @@ function xhrUploadPositions() {
     	// Tiis proved to be not save enough in praxis if:
     	// - The connection was slow
     	bufferTrackPointsOnTheWayToServer = arrayBufferTrackPointsToSend[0];
+    } else {
+    	// Why this upload was added?
+    	// Real world example: The user A is sitting for hours in a biergarden.
+    	// - user A does not move for hours. The app sends uploads new geo locations if user
+    	//   user A moves (lets say) for at least 10 meters. But it does not happen. So no position
+    	//   is uplaode for houres.
+    	// - user B now might think that user A either lost the internet connection, has no
+    	//   GPS signal, stopped sharing, closed the app,.... what ever.
+    	// The following upload tries to avoid this.
+    	if(csvLastGeoLocationToShare != "") {
+        	bufferTrackPointsOnTheWayToServer = csvLastGeoLocationToShare;
+    		paramStoreTrack = "&track=false";
+    	}
     }
     
     // Make sure that every unsent track point gets sent even if the user
@@ -3631,11 +3645,7 @@ function showBrowserPosition(position) {
 			return;
 		}
 	}
-	if (!isLocationUpdateAcceptedByDistance(position)) {
-		return;
-	}
-	browserLastPositionUpdatesMilliseconds = Date.now();
-	// Sometime the time is null. Create anyway.
+	// Sometimes the time is null. Create anyway.
 	var time = getCurrentUTCTimeFormatted();
 	var speed = "";
 	if (position.coords.speed) {
@@ -3654,6 +3664,11 @@ function showBrowserPosition(position) {
 	csvLine += ";altitude=" + altitude;
 	csvLine += ";accuracy=" + accuracy;
 	csvLine += ";time=" + time;
+	csvLastGeoLocationToShare = csvLine;
+	if (!isLocationUpdateAcceptedByDistance(position)) {
+		return;
+	}
+	browserLastPositionUpdatesMilliseconds = Date.now();
 	runSynchronizedInputOutput(csvLine);
 }
 
@@ -3678,7 +3693,7 @@ function showGeoError(error) {
 function readBrowserLocationCsvLine(csvLine) {
 	// Store the track point into the send buffer. This does not send the track
 	// immediatlty. Instead it will be sent by window.startSharing().
-	addTrackPointToSendBuffer(csvLine);
+	addGeoLocationToSendBuffer(csvLine);
 	// Draw the track on the map
 	addBrowserTrackPoint(csvLine);
 	// Show the position on the map
@@ -3875,7 +3890,7 @@ function addTrackPointToDrawBuffer(csvLine) {
  * just in case the user closes the browser.
  * @param csvLine
  */
-function addTrackPointToSendBuffer(csvLine) {
+function addGeoLocationToSendBuffer(csvLine) {
 	if(isEmptyString(csvLine)) {
 		return;
 	}
@@ -4473,27 +4488,27 @@ function test_setSuccessfullUpload() {
 		i++;
 		if (i == 1) {
 			setValue(KEY_STORE_TRACK, "true");
-			addTrackPointToSendBuffer("");
+			addGeoLocationToSendBuffer("");
 			setSuccessfullUpload();
 			if (bufferTrackPointsToSend != "") {
 				break;
 			}
 		} else if (i == 2) {
 			setValue(KEY_STORE_TRACK, "false");
-			addTrackPointToSendBuffer("");
+			addGeoLocationToSendBuffer("");
 			setSuccessfullUpload();
 			if (bufferTrackPointsToSend != "") {
 				break;
 			}
 		}  else if (i == 3) {
 			setValue(KEY_STORE_TRACK, "true");
-			addTrackPointToSendBuffer("aa");
-			addTrackPointToSendBuffer("bb");
+			addGeoLocationToSendBuffer("aa");
+			addGeoLocationToSendBuffer("bb");
 			if (bufferTrackPointsToSend != "aa\nbb") {
 				break;
 			}
 			setValue(KEY_STORE_TRACK, "false");
-			addTrackPointToSendBuffer("ee");
+			addGeoLocationToSendBuffer("ee");
 			if (bufferTrackPointsToSend != "aa\nee") {
 				break;
 			}
@@ -4509,15 +4524,15 @@ function test_setSuccessfullUpload() {
 			}
 			// Send completed but buffer got new lines while sending
 			// bufferTrackPointsOnTheWayToServer = "ee";
-			addTrackPointToSendBuffer("dd");
+			addGeoLocationToSendBuffer("dd");
 			setSuccessfullUpload();
 			if (bufferTrackPointsToSend != "") {
 				break;
 			}
 		}  else if (i == 4) {
 			setValue(KEY_STORE_TRACK, "true");
-			addTrackPointToSendBuffer("aa");
-			addTrackPointToSendBuffer("bb");
+			addGeoLocationToSendBuffer("aa");
+			addGeoLocationToSendBuffer("bb");
 			if (bufferTrackPointsToSend != "aa\nbb") {
 				break;
 			}
@@ -4526,7 +4541,7 @@ function test_setSuccessfullUpload() {
 				break;
 			}
 			// Send completed but buffer got new lines while sending
-			addTrackPointToSendBuffer("xx");
+			addGeoLocationToSendBuffer("xx");
 			setSuccessfullUpload();
 			if (bufferTrackPointsToSend != "xx") {
 				break;
