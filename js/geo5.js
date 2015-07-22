@@ -3387,6 +3387,13 @@ function showWarning(message) {
 	}
 }
 
+function showBuffer(message) {
+	var element = document.getElementById('buffer')
+	if(element) {
+		document.getElementById("buffer").innerHTML = message;
+	}
+}
+
 function showDebug(message) {
 	var element = document.getElementById('debugMessage')
 	if(!element) {
@@ -3425,6 +3432,10 @@ function clearMessages() {
 	element = document.getElementById('warning')
 	if(element) {
 		document.getElementById("warning").innerHTML = "";
+	}
+	element = document.getElementById('buffer')
+	if(element) {
+		document.getElementById("buffer").innerHTML = "";
 	}
 	lastWarningMessage = "";
 }
@@ -3974,7 +3985,7 @@ function setSuccessfullUpload() {
 function showPoinstUnsent() {
 	var pointsLeft = arrayBufferTrackPointsToSend.length;
 	if(pointsLeft > 0) {
-		showWarning("Points unsent " + pointsLeft)
+		showBuffer("Points unsent " + pointsLeft)
 	} else {
 		clearMessages();
 	}
