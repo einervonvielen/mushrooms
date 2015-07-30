@@ -1,4 +1,4 @@
-var version = "Version 2015-07-22, GPLv3";
+var version = "Version 2015-07-27, GPLv3";
 //-------------------
 //-- Docu messages --
 //
@@ -3626,6 +3626,7 @@ function restartPositionUpdate() {
 		stopWatchPosition();
 	}
 	blockPositionUpdate = false;
+    browserLastPositionUpdatesMilliseconds = 0;
 	watchPosition();
 }
 
@@ -3646,15 +3647,15 @@ function showBrowserPosition(position) {
 	if(blockPositionUpdate) {
 		return;
 	}
-	if (!isLocationUpdateAcceptedByTime()) {
-		return;
-	}
 	var accuracy = "";
 	if (position.coords.accuracy) {
 		accuracy = position.coords.accuracy;
 		if (!isLocationUpdateAcceptedByAccuracy(accuracy)) {
 			return;
 		}
+	}
+	if (!isLocationUpdateAcceptedByTime()) {
+		return;
 	}
 	// Sometimes the time is null. Create anyway.
 	var time = getCurrentUTCTimeFormatted();
@@ -3717,7 +3718,7 @@ function stopWatchPosition() {
 	}
 	navigator.geolocation.clearWatch(watchPositionId);
 	watchPositionId = -1;
-	browserLastPositionUpdatesMilliseconds = 0;
+//	browserLastPositionUpdatesMilliseconds = 0;
 	blockPositionUpdate = true;
 }
 
@@ -3907,11 +3908,7 @@ function addGeoLocationToSendBuffer(csvLine) {
 	}
 	var isStoreTrack = getValue(KEY_STORE_TRACK);
 	if (!isStoreTrack.match(/true/i)) {
-		// Overwrite the last position and return.
-		
-		// Old methond. Included a bug btw beacuse it deletes the unsent track points.
-		// bufferTrackPointsToSend = csvLine;
-		
+		// Overwrite the last position and return.		
 		var l = arrayBufferTrackPointsToSend.length;
 		if(l > 0) {
 			arrayBufferTrackPointsToSend[l - 1] = csvLine;
@@ -4105,6 +4102,9 @@ function getTimeFormatted(milliseconds) {
  *   those positions can be buffered.
  */
 function runSynchronizedInputOutput(inputString) {
+	if(isEmptyString(inputString)) {
+		return;
+	}
 	// --Do the "parallel" (blocking) stuff--------------------------------------
 	if(isInputOutputBlocked) {
 		// Wny this "buffer"?
