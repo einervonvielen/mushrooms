@@ -42,7 +42,7 @@ Mushrooms can run on your own server. You are in control of the service and your
 There are no backdoors. You can check the code.
 And its free.
 
-# How...to install?
+# How to install on your own Webserver?
 
 Make sure you have a php-enabled webserver, let's name it http://example.com/
 
