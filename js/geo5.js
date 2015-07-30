@@ -2909,8 +2909,8 @@ function createInputsSettings() {
 	text += "<br/>";
 	text += version;
 	text += "<br/>";
-	text += "Find <a href=\"https://sourceforge.net/p/geo5/wiki/Home/\" target=\"_blank\">help</a>. ";
-	text += "Please report <a href=\"https://sourceforge.net/p/geo5/tickets/\" target=\"_blank\">bugs</a>.";
+	text += "Find <a href=\"https://github.com/einervonvielen/mushrooms/\" target=\"_blank\">help</a>. ";
+	text += "Please report <a href=\"https://github.com/einervonvielen/mushrooms/issues/\" target=\"_blank\">bugs</a>.";
 
 	return text;
 }
