@@ -1,4 +1,4 @@
-# Find your friends on a map
+# Find your Friends on a Map
 
 * runs in every modern browser
 * very easy to use
@@ -22,7 +22,7 @@ It might be that you mobile device will pause the sharing (upload, download) of 
 
 Privacy: ALL your data is deleted from the server if you press "Remove".
 
-### The can fine tune it
+### They can fine tune it
 
 ![mushrooms](doc/mushrooms_positions.jpg)
 
