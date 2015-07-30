@@ -2,6 +2,7 @@
 
 * runs in every modern browser
 * very easy to use
+* record tracks
 
 It's about privacy. Reclaim the internet from authorities and companies! More on this further down.
 
@@ -11,10 +12,10 @@ It might be that you mobile device will pause the sharing (upload, download) of 
 
 ![mushrooms](doc/mushrooms.jpg)
 
-### All they have to do is...
+### All they have to do is to...
 
-1. to open a link as on this [demo server](http://jfellow.net/geo5)
-2. to enter: User "Jane", Pass "secret", Group "us"
+1. open a [link](http://jfellow.net/geo5) (this is just a demo server)
+2. enter: User "Jane", Password "secret", Group "us"
 
 **Important** - they use the **same group** "us" to see each other on the map.
 
