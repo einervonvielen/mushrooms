@@ -1,4 +1,4 @@
-# Find your Friends on a Map
+# See your Friends moving on a Map
 
 * runs in every modern browser
 * very easy to use
