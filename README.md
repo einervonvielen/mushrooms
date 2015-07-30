@@ -2,6 +2,10 @@
 
 ...share your geo-location with friends. How?
 
+test screenshot
+
+![mushrooms](doc/mushrooms.jpg)
+
     Open http://jfellow.net/geo5/
     Press "You", then enter your username, password and group. Use the same group name as your friends!
 
