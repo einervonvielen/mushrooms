@@ -20,7 +20,7 @@ It might be that you mobile device will pause the sharing (upload, download) of 
 
 ![mushrooms](doc/mushrooms_you.jpg)
 
-Privacy: If you press "Remove" ALL your data is deleted from the server.
+Privacy: ALL your data is deleted from the server if you press "Remove".
 
 ### The can fine tune it
 
@@ -35,7 +35,7 @@ Privacy: If you press "Remove" ALL your data is deleted from the server.
 It's about privacy. Reclaim the internet from authorities and companies!
 
 Why not using Google+ to share your position?
-Because they operate centralized and recorded your data for good in big databases.
+Because they recorded your data for good in big databases and try to sell your data.
 
 Mushrooms can run on your own server. You are in control of the service and your data.
 
