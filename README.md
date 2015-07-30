@@ -16,7 +16,7 @@ It might be that you mobile device will pause the sharing (upload, download) of 
 1. to open a link as on this [demo server](http://jfellow.net/geo5)
 2. to enter: User "Jane", Pass "secret", Group "us"
 
-... and - **important** - use the **same group "us"** to see each other on the map.
+**Important** - they use the **same group** "us" to see each other on the map.
 
 ![mushrooms](doc/mushrooms_you.jpg)
 
