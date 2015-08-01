@@ -1,4 +1,4 @@
-var version = "Version 2015-07-30, GPLv3";
+var version = "Version 2015-08-31, GPLv3";
 //-------------------
 //-- Docu messages --
 //
@@ -287,6 +287,7 @@ var arrayBufferTrackPointsToSend = new Array();
 var KEY_BROWSER_BUFFER_TRACK_POINTS_TO_SEND = "browser_track_to_send";
 var bufferTrackPointsOnTheWayToServer = ""; // this is the part of the track that is just on the way to the server
 var csvLastGeoLocationToShare = ""; // Used for upload if nothing is in in the send buffer
+var isFirstPositionFound = false;
 
 // XHR
 var xhr;
@@ -322,6 +323,7 @@ var style = {
 
 function init() {
 	clearMessages();
+	showWarning("Waiting for Location...");
 	initMap();
 	if (isStartingWithTests()) {
 		startTests();
@@ -342,7 +344,9 @@ function startApp() {
 		var bufPoints = bufferTrackPointsToSend.split("\n");
 		var pointCount = bufferTrackPointsToSend.length;
 		for ( var i = 0; i < pointCount; i++) {
-			arrayBufferTrackPointsToSend.push(bufPoints[i]);
+			if(bufPoints[i]) {
+				arrayBufferTrackPointsToSend.push(bufPoints[i]);
+			}
 		}
 	}
 	
@@ -3378,6 +3382,9 @@ function getListValueForSeconds(milliseconds) {
 	}
 	return listValue;
 }
+function hideStartLocationMessage() {
+	clearWarningMessages();
+}
 
 function showWarning(message) {
 	lastWarningMessage = message;
@@ -3429,13 +3436,17 @@ function clearMessages() {
 	if(element) {
 		document.getElementById("debugMessage").innerHTML = "";
 	}
-	element = document.getElementById('warning')
-	if(element) {
-		document.getElementById("warning").innerHTML = "";
-	}
+	clearWarningMessages()
 	element = document.getElementById('buffer')
 	if(element) {
 		document.getElementById("buffer").innerHTML = "";
+	}
+}
+
+function clearWarningMessages() {
+	var element = document.getElementById('warning')
+	if(element) {
+		document.getElementById("warning").innerHTML = "";
 	}
 	lastWarningMessage = "";
 }
@@ -3645,6 +3656,14 @@ function watchPosition() {
 
 function showBrowserPosition(position) {
 	if(blockPositionUpdate) {
+		return;
+	}
+	if(position.coords.latitude && position.coords.longitude) {
+		if(!isFirstPositionFound) {
+			hideStartLocationMessage();
+			isFirstPositionFound = true;
+		}
+	} else {
 		return;
 	}
 	var accuracy = "";
