@@ -1,4 +1,4 @@
-var version = "Version 2015-08-31, GPLv3";
+var version = "Version 2015-08-02, GPLv3";
 //-------------------
 //-- Docu messages --
 //
@@ -323,7 +323,7 @@ var style = {
 
 function init() {
 	clearMessages();
-	showWarning("Waiting for Location...");
+	showWaiting("Waiting for Location...");
 	initMap();
 	if (isStartingWithTests()) {
 		startTests();
@@ -3382,9 +3382,6 @@ function getListValueForSeconds(milliseconds) {
 	}
 	return listValue;
 }
-function hideStartLocationMessage() {
-	clearWarningMessages();
-}
 
 function showWarning(message) {
 	lastWarningMessage = message;
@@ -3398,6 +3395,13 @@ function showBuffer(message) {
 	var element = document.getElementById('buffer')
 	if(element) {
 		document.getElementById("buffer").innerHTML = message;
+	}
+}
+
+function showWaiting(message) {
+	var element = document.getElementById('waiting')
+	if(element) {
+		document.getElementById("waiting").innerHTML = message;
 	}
 }
 
@@ -3449,6 +3453,13 @@ function clearWarningMessages() {
 		document.getElementById("warning").innerHTML = "";
 	}
 	lastWarningMessage = "";
+}
+
+function clearWaitingMessages() {
+	var element = document.getElementById('waiting')
+	if(element) {
+		document.getElementById("waiting").innerHTML = "";
+	}
 }
 
 // Returns a formated date like 2012-05-17 18:02:56.063
@@ -3660,7 +3671,7 @@ function showBrowserPosition(position) {
 	}
 	if(position.coords.latitude && position.coords.longitude) {
 		if(!isFirstPositionFound) {
-			hideStartLocationMessage();
+			clearWaitingMessages();
 			isFirstPositionFound = true;
 		}
 	} else {
