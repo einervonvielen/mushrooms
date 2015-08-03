@@ -15,7 +15,10 @@ It might be that you mobile device will pause the sharing (upload, download) of 
 ### All they have to do is to...
 
 1. open a [link](http://jfellow.net/geo5) (this is just a demo server)
-2. enter: User "Jane", Password "secret", Group "us"
+2. enter:
+    * User "Jane",
+    * Password "secret",
+    * Group "us"
 
 **Important** - they use the **same group** "us" to see each other on the map.
 
