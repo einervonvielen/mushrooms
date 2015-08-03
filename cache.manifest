@@ -1,24 +1,24 @@
 CACHE MANIFEST
-# 2013-12-04
+# 2015-08-03
 CACHE:
 index.html
 js/geo5.js
 pic/marker.png
 pic/mushroom.svg
 pic/mushroom_user.svg
-http://www.openlayers.org/api/OpenLayers.js
-http://www.openstreetmap.org/openlayers/OpenStreetMap.js
-http://www.openlayers.org/api/theme/default/style.css
-http://www.openlayers.org/api/img/north-mini.png
-http://www.openlayers.org/api/img/west-mini.png
-http://www.openlayers.org/api/img/east-mini.png
-http://www.openlayers.org/api/img/south-mini.png
-http://www.openlayers.org/api/img/zoom-plus-mini.png
-http://www.openlayers.org/api/img/slider.png
-http://www.openlayers.org/api/img/zoom-minus-mini.png
-http://www.openlayers.org/api/img/layer-switcher-maximize.png
-http://www.openlayers.org/api/img/layer-switcher-minimize.png
-http://www.openlayers.org/api/img/zoombar.png
+js/OpenLayers.js
+js/OpenStreetMap.js
+js/theme/default/style.css
+js/img/north-mini.png
+js/img/west-mini.png
+js/img/east-mini.png
+js/img/south-mini.png
+js/img/zoom-plus-mini.png
+js/img/slider.png
+js/img/zoom-minus-mini.png
+js/img/layer-switcher-maximize.png
+js/img/layer-switcher-minimize.png
+js/img/zoombar.png
 
 # Resources that require the user to be online.
 # NETWORK:

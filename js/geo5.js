@@ -1,4 +1,4 @@
-var version = "Version 2015-08-02, GPLv3";
+var version = "Version 2015-08-03, GPLv3";
 //-------------------
 //-- Docu messages --
 //
