@@ -21,7 +21,7 @@ It might be that you mobile device will pause the sharing (upload, download) of 
     * Password "secret",
     * Group "us"
 
-**Important** - they use the **same group** "us" to see each other on the map.
+**Important** - Jane and Bob use the **same group** "us" to see each other on the map.
 
 ![mushrooms](doc/mushrooms_you.jpg)
 
