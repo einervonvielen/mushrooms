@@ -14,7 +14,8 @@ It might be that you mobile device will pause the sharing (upload, download) of 
 
 ### All they have to do is to...
 
-1. open a [link](http://jfellow.net/geo5) (this is just a demo server)
+1. open a link
+    * for example on [link](http://jfellow.net/geo5) (this demo server)
 2. enter:
     * User "Jane",
     * Password "secret",
