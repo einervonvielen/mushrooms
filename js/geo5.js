@@ -3695,8 +3695,8 @@ function showBrowserPosition(position) {
 		altitude = position.coords.altitude;
 	}
 	var user = getValue(KEY_USER);
-	// var csvLine = "user=" + user;
-	var csvLine = "lat=" + position.coords.latitude;
+	var csvLine = "user=" + user;
+	csvLine += ";lat=" + position.coords.latitude;
 	csvLine += ";lon=" + position.coords.longitude;
 	csvLine += ";bearing=";
 	csvLine += ";speed=" + speed;
