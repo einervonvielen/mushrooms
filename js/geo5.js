@@ -1711,9 +1711,6 @@ function xhrHandleHttpResponse() {
 				} else if (nextXHR == XHR_KEY_ACTION_GET_SERVER_CONFIG) {
 					showServerError("Failed to load user preferences from server.\n\nServer response:\n"
 							+ httpResponseText);
-				} else if (nextXHR == XHR_KEY_ACTION_UPLOADED_POSITIONS) {
-					// TODO: Show an icon or whatever to signal there are
-					// positions or track points that where not send yet
 				} else {
 					showServerError(this.responseText);
 				}
