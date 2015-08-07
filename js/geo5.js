@@ -1,4 +1,4 @@
-var version = "Version 2015-08-03, GPLv3";
+var version = "Version 2015-08-07, GPLv3";
 //-------------------
 //-- Docu messages --
 //
@@ -1120,9 +1120,6 @@ function readPositionLine(line) {
 		var layerName = positionLayers[i].name;
 		if (lineUser == layerName) {
 			changePositionOnLayer(lineLon, lineLat, lineUser);
-			// Check it the existing track started yesterday
-			// If yes then remove. Why? The map displays only way points from today.
-			removeTrackIfFromYesterday(lineUser);
 			return true;
 		}
 	}
@@ -1394,6 +1391,7 @@ function share() {
 	}
 	timestampLastShareAttempt = Date.now();
 	clearMessages();
+	removeAllTracksFromYesterday();
 	xhrUploadPositions();
 }
 function startSharing() {
@@ -2359,9 +2357,6 @@ function readTrackLine(line, coords, currentTrackUser) {
 		// Do not draw tracks that are not from (local) today.
 		return;
 	}
-	// Check it the existing track started yesterday
-	// If yes then remove. Why? The map displays only way points from today.
-//	removeTrackIfFromYesterday(currentTrackUser);
 	// Create a point and add to the array of coordinates (to draw on the map, later)
 	if (lat != 0 && lon != 0) {
 		var point = new Array(lon, lat);
@@ -2374,6 +2369,17 @@ function readTrackLine(line, coords, currentTrackUser) {
 			// Add track point to buffer of focused user
 			addTrackPointToDrawBuffer(line);
 		}
+	}
+}
+
+function removeAllTracksFromYesterday() {
+	var groupMember;
+	var userCount = groupMembers.length;
+	for ( var i = 0; i < userCount; i++) {
+		// Array{ [user-name], [date-time], [lat], [lon] }
+		groupMember = groupMembers[i];
+		var userName = groupMember[KEY_GROUP_MEMBER_NAME];
+		removeTrackIfFromYesterday(userName);
 	}
 }
 
