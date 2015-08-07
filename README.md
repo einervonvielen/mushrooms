@@ -15,13 +15,17 @@ It might be that you mobile device will pause the sharing (upload, download) of 
 ### All they have to do is to...
 
 1. open a link
+<<<<<<< HEAD
     * for example on [link](http://jfellow.net/geo5) (this demo server)
+=======
+    * for example on [this demo server](http://jfellow.net/geo5)
+>>>>>>> branch 'master' of https://github.com/einervonvielen/mushrooms.git
 2. enter:
     * User "Jane",
     * Password "secret",
     * Group "us"
 
-**Important** - they use the **same group** "us" to see each other on the map.
+**Important** - Jane and Bob use the **same group** "us" to see each other on the map.
 
 ![mushrooms](doc/mushrooms_you.jpg)
 
