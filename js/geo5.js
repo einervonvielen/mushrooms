@@ -173,7 +173,7 @@ var VALUE_TRACK_IN_LAYER_LIST = "Track ";
 var VALUE_BROWSER_IN_LAYER_LIST = "Browser Position";
 var trackDate = 'today';
 var VALUE_TODAY = 'today';
-var VALUE_PLEASE_SELECT = 'Please select';
+var VALUE_PLEASE_SELECT = 'Clear';
 var trackDateListBuffer = "";
 var trackNameSelected = "";
 var browser = false;
@@ -768,6 +768,9 @@ function updateTracksForListSelection() {
 			// shows them.
 			xhrUpdateTracks();
 			setTrackDownloadLink(trackNameSelected);
+		} else if (trackNameSelected == VALUE_PLEASE_SELECT) {
+			// Remove historic tracks
+			removeHistoricTracks();
 		} else {
 			// Remove all old tracks
 			// startApp();
@@ -949,30 +952,6 @@ function loadArrayFromStorageHelper(keyArray, valueArray) {
 // Tracks
 // //////////////////////////////////////////////////////////////////////////////
 
-function addTrack(user) {
-	var user = getValue(KEY_USER);
-	var element = document.getElementById('trackDate')
-	if(!element) {
-		return;
-	}
-	var selectedTrack = document.getElementById('trackDate').value;
-	var lgpx = new OpenLayers.Layer.Vector(VALUE_TRACK_IN_LAYER_LIST + user, {
-		strategies : [ new OpenLayers.Strategy.Fixed() ],
-		protocol : new OpenLayers.Protocol.HTTP({
-			url : "users/" + user + "/" + selectedTrack,
-			format : new OpenLayers.Format.GPX()
-		}),
-		style : {
-			strokeColor : "red",
-			strokeWidth : 5,
-			strokeOpacity : 0.5
-		},
-		projection : new OpenLayers.Projection("EPSG:4326")
-	});
-	mapAddLayer(lgpx);
-	// store for later usage
-	trackLayers.push(lgpx);
-}
 function removeTrackLayers() {
 	// Remove all track layers
 	clearTrackLayers();
@@ -1009,6 +988,10 @@ function removePositionLayer(userName) {
 		}
 	}
 }
+/**
+ * 
+ * @param userLines
+ */
 function updateTracks(userLines) {
 	if (!map) {
 		return;
@@ -1026,7 +1009,7 @@ function updateTracks(userLines) {
 		return;
 	}
 
-	removeTrackLayers();
+	removeHistoricTracks();
 
 	// Load all tracks for found users (on server) for this track name
 	var selectedTrack = document.getElementById('trackDate').value;
@@ -1039,7 +1022,7 @@ function updateTracks(userLines) {
 			continue;
 		}
 		var lgpx = new OpenLayers.Layer.Vector(VALUE_TRACK_IN_LAYER_LIST
-				+ userName, {
+				+ userName + " " + trackNameSelected, {
 			strategies : [ new OpenLayers.Strategy.Fixed() ],
 			protocol : new OpenLayers.Protocol.HTTP({
 				url : "users/" + userName + "/" + selectedTrack,
@@ -2041,12 +2024,12 @@ function fillDropDownTracks() {
 	var selectedIndex = 0;
 	var lineCount = lineArray.length;
 	for ( var i = 0; i < lineCount; i++) {
-		// if (i == 0) {
-		// var trackOption = document.createElement('option');
-		// trackOption.text = VALUE_PLEASE_SELECT;
-		// trackOption.value = VALUE_PLEASE_SELECT;
-		// trackList.add(trackOption, null); // append at end of list
-		// }
+		if (i == 0) {
+			var trackOption = document.createElement('option');
+			trackOption.text = VALUE_PLEASE_SELECT;
+			trackOption.value = VALUE_PLEASE_SELECT;
+			trackList.add(trackOption, null); // append at end of list
+		}
 		var line = lineArray[i];
 		var line = line.trim();
 		if ('' == line) {
@@ -2428,6 +2411,24 @@ function removeTrack(userName) {
 	clearDetailsToUserTrackpoints(userName);
 	// Remove track on the map
 	removeTrackLayer(userName);
+}
+
+function removeHistoricTracks() {
+	// VALUE_TRACK_IN_LAYER_LIST + userName + " " + trackNameSelected
+	if(isEmptyString(trackNameSelected)) {
+		return;
+	}
+	var l = trackLayers.length;
+	if (l > 0) {
+		for ( var i = 0; i < l; i++) {
+			var trackName = trackLayers[i].name;
+			if (trackName.isIndexOf(trackNameSelected) != -1) {
+				mapRemoveLayer(trackLayers[i]);
+				trackLayers.splice(i, 1);
+			}
+		}
+	}
+	trackNameSelected = "";
 }
 
 function setUserLastDetails(user, time, speed, altitude) {
