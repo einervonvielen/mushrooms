@@ -2438,7 +2438,6 @@ function removeHistoricTracks() {
 		for ( var i = l - 1; i >= 0; i--) {
 			var trackName = trackLayers[i].name;
 			// if (trackName.indexOf(trackNameSelected) != -1) {
-			
 			if (trackName.search(/\d\d\d\d-\d\d-\d\d/) != -1) {
 				mapRemoveLayer(trackLayers[i]);
 				trackLayers.splice(i, 1);
