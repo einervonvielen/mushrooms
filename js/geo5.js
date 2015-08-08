@@ -1,4 +1,4 @@
-var version = "Version 2015-08-07, GPLv3";
+var version = "Version 2015-08-08, GPLv3";
 //-------------------
 //-- Docu messages --
 //
@@ -173,7 +173,7 @@ var VALUE_TRACK_IN_LAYER_LIST = "Track ";
 var VALUE_BROWSER_IN_LAYER_LIST = "Browser Position";
 var trackDate = 'today';
 var VALUE_TODAY = 'today';
-var VALUE_PLEASE_SELECT = 'Please select';
+var VALUE_PLEASE_SELECT = 'Clear';
 var trackDateListBuffer = "";
 var trackNameSelected = "";
 var browser = false;
@@ -768,6 +768,9 @@ function updateTracksForListSelection() {
 			// shows them.
 			xhrUpdateTracks();
 			setTrackDownloadLink(trackNameSelected);
+		} else if (trackNameSelected == VALUE_PLEASE_SELECT) {
+			// Remove historic tracks
+			removeHistoricTracks();
 		} else {
 			// Remove all old tracks
 			// startApp();
@@ -949,30 +952,6 @@ function loadArrayFromStorageHelper(keyArray, valueArray) {
 // Tracks
 // //////////////////////////////////////////////////////////////////////////////
 
-function addTrack(user) {
-	var user = getValue(KEY_USER);
-	var element = document.getElementById('trackDate')
-	if(!element) {
-		return;
-	}
-	var selectedTrack = document.getElementById('trackDate').value;
-	var lgpx = new OpenLayers.Layer.Vector(VALUE_TRACK_IN_LAYER_LIST + user, {
-		strategies : [ new OpenLayers.Strategy.Fixed() ],
-		protocol : new OpenLayers.Protocol.HTTP({
-			url : "users/" + user + "/" + selectedTrack,
-			format : new OpenLayers.Format.GPX()
-		}),
-		style : {
-			strokeColor : "red",
-			strokeWidth : 5,
-			strokeOpacity : 0.5
-		},
-		projection : new OpenLayers.Projection("EPSG:4326")
-	});
-	mapAddLayer(lgpx);
-	// store for later usage
-	trackLayers.push(lgpx);
-}
 function removeTrackLayers() {
 	// Remove all track layers
 	clearTrackLayers();
@@ -1009,6 +988,10 @@ function removePositionLayer(userName) {
 		}
 	}
 }
+/**
+ * 
+ * @param userLines
+ */
 function updateTracks(userLines) {
 	if (!map) {
 		return;
@@ -1016,20 +999,17 @@ function updateTracks(userLines) {
 	if (isEmptyString(userLines)) {
 		return;
 	}
-	var element = document.getElementById('trackDate')
-	if(!element) {
+	if(isEmptyString(trackNameSelected)) {
 		return;
 	}
-	var selectedTrack = document.getElementById('trackDate').value;
-	if (selectedTrack == VALUE_TODAY_IN_TRACK_LIST) {
+	if (trackNameSelected == VALUE_TODAY_IN_TRACK_LIST) {
 		// Tracks from today are not loaded from gpx
 		return;
 	}
 
-	removeTrackLayers();
+	removeHistoricTracks();
 
 	// Load all tracks for found users (on server) for this track name
-	var selectedTrack = document.getElementById('trackDate').value;
 	var lines = userLines.split("\n");
 	var lineCount = lines.length;
 	for ( var i = 0; i < lineCount; i++) {
@@ -1039,10 +1019,10 @@ function updateTracks(userLines) {
 			continue;
 		}
 		var lgpx = new OpenLayers.Layer.Vector(VALUE_TRACK_IN_LAYER_LIST
-				+ userName, {
+				+ userName + " " + trackNameSelected, {
 			strategies : [ new OpenLayers.Strategy.Fixed() ],
 			protocol : new OpenLayers.Protocol.HTTP({
-				url : "users/" + userName + "/" + selectedTrack,
+				url : "users/" + userName + "/" + trackNameSelected,
 				format : new OpenLayers.Format.GPX()
 			}),
 			style : {
@@ -1391,8 +1371,12 @@ function share() {
 	}
 	timestampLastShareAttempt = Date.now();
 	clearMessages();
-	removeAllTracksFromYesterday();
-	xhrUploadPositions();
+	if(removeAllTracksFromYesterday()) {
+		// New day
+		xhrListTracks();
+	} else {
+		xhrUploadPositions();
+	}
 }
 function startSharing() {
 	stopSharing();
@@ -2041,12 +2025,12 @@ function fillDropDownTracks() {
 	var selectedIndex = 0;
 	var lineCount = lineArray.length;
 	for ( var i = 0; i < lineCount; i++) {
-		// if (i == 0) {
-		// var trackOption = document.createElement('option');
-		// trackOption.text = VALUE_PLEASE_SELECT;
-		// trackOption.value = VALUE_PLEASE_SELECT;
-		// trackList.add(trackOption, null); // append at end of list
-		// }
+		if (i == 0) {
+			var trackOption = document.createElement('option');
+			trackOption.text = VALUE_PLEASE_SELECT;
+			trackOption.value = VALUE_PLEASE_SELECT;
+			trackList.add(trackOption, null); // append at end of list
+		}
 		var line = lineArray[i];
 		var line = line.trim();
 		if ('' == line) {
@@ -2373,14 +2357,18 @@ function readTrackLine(line, coords, currentTrackUser) {
 }
 
 function removeAllTracksFromYesterday() {
+	var hasRemoved = false;
 	var groupMember;
 	var userCount = groupMembers.length;
 	for ( var i = 0; i < userCount; i++) {
 		// Array{ [user-name], [date-time], [lat], [lon] }
 		groupMember = groupMembers[i];
 		var userName = groupMember[KEY_GROUP_MEMBER_NAME];
-		removeTrackIfFromYesterday(userName);
+		if(removeTrackIfFromYesterday(userName)) {
+			hasRemoved = true;
+		}
 	}
+	return hasRemoved;
 }
 
 /**
@@ -2392,7 +2380,7 @@ function removeAllTracksFromYesterday() {
  */
 function removeTrackIfFromYesterday(userName) {
 	if(userName == "") {
-		return;
+		return false;
 	}
 	var groupMember = getGroupMember(userName);
 	var existingTackStartDateTime = groupMember[KEY_GROUP_MEMBER_TRACK_START_TIME];
@@ -2401,8 +2389,10 @@ function removeTrackIfFromYesterday(userName) {
 		if(! isLocalToday) {
 			// The existing track is not from today. Remove it.
 			removeTrack(userName);
+			return true;
 		}
 	}
+	return false;
 }
 
 /**
@@ -2428,6 +2418,28 @@ function removeTrack(userName) {
 	clearDetailsToUserTrackpoints(userName);
 	// Remove track on the map
 	removeTrackLayer(userName);
+}
+
+function removeHistoricTracks() {
+	var hasRemoved = false;
+	// VALUE_TRACK_IN_LAYER_LIST + userName + " " + trackNameSelected
+	if(isEmptyString(trackNameSelected)) {
+		return hasRemoved;
+	}
+	var l = trackLayers.length;
+	if (l > 0) {
+		for ( var i = 0; i < l; i++) {
+			var trackName = trackLayers[i].name;
+			// if (trackName.indexOf(trackNameSelected) != -1) {
+			
+			if (trackName.search(/\d\d\d\d-\d\d-\d\d/) != -1) {
+				mapRemoveLayer(trackLayers[i]);
+				trackLayers.splice(i, 1);
+				hasRemoved = true;
+			}
+		}
+	}
+	return hasRemoved;
 }
 
 function setUserLastDetails(user, time, speed, altitude) {
@@ -4325,6 +4337,8 @@ function runTest() {
 	} else if (testCounter == 15) {
 		testWrongPassword();
 	} else if (testCounter == 16) {
+		testShowHistoricTrack();
+	} else if (testCounter == 17) {
 		testServerError();
 	} else {
 		endTests();
@@ -4482,9 +4496,9 @@ function assert() {
 			testHasPassed = assertHelperServerResponse();
 		}
 	} else if (testCounter == 16) {
-		var found = document.getElementById("warning").innerHTML;
-		var expected = "Not connected (open failed)";
-		if(found != expected) {
+		//
+	} else if (testCounter == 17) {
+		if(!removeHistoricTracks()) {
 			testHasPassed = false;
 		}
 	} else {
@@ -4800,6 +4814,17 @@ function testRemoveTrack() {
 	setValue(KEY_SCRIPT_URL, getDefaultPHP());
 	removeTrack(testUserA);
 	assert();
+}
+
+function testShowHistoricTrack() {
+	addTestResult("Historic Track");
+	setValue(KEY_USER, testUserB);
+	setValue(KEY_PASS, testPassB);
+	setValue(KEY_GROUP, testGroupA);
+	xhrListTracks();
+	trackNameSelected = "2013-10-10.gpx";
+	xhrUpdateTracks();
+	setTimeout(assert, testTimeout);
 }
 
 function testServerError() {
