@@ -4347,8 +4347,6 @@ function runTest() {
 		testWrongPassword();
 	} else if (testCounter == 16) {
 		testShowHistoricTrack();
-	} else if (testCounter == 17) {
-		testServerError();
 	} else {
 		endTests();
 	}
@@ -4505,8 +4503,6 @@ function assert() {
 			testHasPassed = assertHelperServerResponse();
 		}
 	} else if (testCounter == 16) {
-		//
-	} else if (testCounter == 17) {
 		if(!removeHistoricTracks()) {
 			testHasPassed = false;
 		}
@@ -4836,6 +4832,7 @@ function testShowHistoricTrack() {
 	setTimeout(assert, testTimeout);
 }
 
+// This is obsolet because the user can't change the URL any more
 function testServerError() {
 	addTestResult("Server error");
 	setValue(KEY_USER, testUserC);
