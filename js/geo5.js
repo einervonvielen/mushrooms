@@ -771,6 +771,7 @@ function updateTracksForListSelection() {
 		} else if (trackNameSelected == VALUE_PLEASE_SELECT) {
 			// Remove historic tracks
 			removeHistoricTracks();
+			setTrackDownloadLink("");
 		} else {
 			// Remove all old tracks
 			// startApp();
@@ -2040,8 +2041,12 @@ function fillDropDownTracks() {
 		trackOption.text = line;
 		trackOption.value = line;
 		trackList.add(trackOption, null); // append at end of list
-		// Show download link
-		setTrackDownloadLink(line);
+		if(line == trackNameSelected) {
+			// user has selected a track befor
+			selectedIndex = i + 1;
+			// Show download link
+			setTrackDownloadLink(line);
+		}
 	}
 	var element = document.getElementById('trackDate')
 	if(element) {
@@ -3272,7 +3277,9 @@ function setTrackDownloadLink(fileName) {
 	var text = "";
 	if (fileName != "") {
 		var path = window.location.pathname;
-		href = path + "users/" + user + "/" + fileName;
+		var lastIndex = path.lastIndexOf("/");
+		var pathUsed = path.substring(0, lastIndex);
+		href = pathUsed + "/users/" + user + "/" + fileName;
 		text = "Download";
 	}
 	inputElement.href = href;
