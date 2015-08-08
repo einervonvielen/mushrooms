@@ -1374,6 +1374,8 @@ function share() {
 	clearMessages();
 	if(removeAllTracksFromYesterday()) {
 		// New day
+		// This request to the server will implicitly create all GPX files
+		// for *.cvs (if not created befor)
 		xhrListTracks();
 	} else {
 		xhrUploadPositions();
