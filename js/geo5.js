@@ -2278,7 +2278,7 @@ function displayServerPositionUpdate(serverResponse) {
 		if (hasToLoadGpxTracksAtProgrammStart) {
 			hasToLoadGpxTracksAtProgrammStart = false;
 			if (!isEmptyString(trackDateListBuffer)) {
-				trackNameSelected = getLastFromTrackList();
+				// trackNameSelected = getLastFromTrackList();
 				xhrUpdateTracks();
 			}
 		}
