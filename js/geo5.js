@@ -2278,7 +2278,7 @@ function displayServerPositionUpdate(serverResponse) {
 		if (hasToLoadGpxTracksAtProgrammStart) {
 			hasToLoadGpxTracksAtProgrammStart = false;
 			if (!isEmptyString(trackDateListBuffer)) {
-				trackNameSelected = getLastFromTrackList();
+				// trackNameSelected = getLastFromTrackList();
 				xhrUpdateTracks();
 			}
 		}
@@ -2435,10 +2435,9 @@ function removeHistoricTracks() {
 	}
 	var l = trackLayers.length;
 	if (l > 0) {
-		for ( var i = l - 1; i == 0; i--) {
+		for ( var i = l - 1; i >= 0; i--) {
 			var trackName = trackLayers[i].name;
 			// if (trackName.indexOf(trackNameSelected) != -1) {
-			
 			if (trackName.search(/\d\d\d\d-\d\d-\d\d/) != -1) {
 				mapRemoveLayer(trackLayers[i]);
 				trackLayers.splice(i, 1);
