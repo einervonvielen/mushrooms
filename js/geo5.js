@@ -2435,7 +2435,7 @@ function removeHistoricTracks() {
 	}
 	var l = trackLayers.length;
 	if (l > 0) {
-		for ( var i = 0; i < l; i++) {
+		for ( var i = l - 1; i >= 0; i--) {
 			var trackName = trackLayers[i].name;
 			// if (trackName.indexOf(trackNameSelected) != -1) {
 			
