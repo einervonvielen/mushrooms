@@ -173,7 +173,7 @@ var VALUE_TRACK_IN_LAYER_LIST = "Track ";
 var VALUE_BROWSER_IN_LAYER_LIST = "Browser Position";
 var trackDate = 'today';
 var VALUE_TODAY = 'today';
-var VALUE_PLEASE_SELECT = 'Clear';
+var VALUE_PLEASE_SELECT = 'Select / Clear';
 var trackDateListBuffer = "";
 var trackNameSelected = "";
 var browser = false;
@@ -1009,6 +1009,8 @@ function updateTracks(userLines) {
 	}
 
 	removeHistoricTracks();
+	var lastIndex = trackNameSelected.lastIndexOf(".");
+	var dateTrack = trackNameSelected.substring(0, lastIndex);
 
 	// Load all tracks for found users (on server) for this track name
 	var lines = userLines.split("\n");
@@ -1019,8 +1021,7 @@ function updateTracks(userLines) {
 		if ('' == userName) {
 			continue;
 		}
-		var lgpx = new OpenLayers.Layer.Vector(VALUE_TRACK_IN_LAYER_LIST
-				+ userName + " " + trackNameSelected, {
+		var lgpx = new OpenLayers.Layer.Vector(userName + " " + dateTrack, {
 			strategies : [ new OpenLayers.Strategy.Fixed() ],
 			protocol : new OpenLayers.Protocol.HTTP({
 				url : "users/" + userName + "/" + trackNameSelected,
