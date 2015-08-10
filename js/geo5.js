@@ -23,8 +23,8 @@ var version = "Version 2015-08-09, GPLv3";
 //
 //  2. List Tracks
 //    When called?
-//    - Only once at start up
-//    - After saving the configuration, see above
+//    - At start up
+//    - After saving the configuration (switch user)
 //    Request message
 //    - Browser > Server
 //      "user=me&pass=mysecret&group=mygroup&listTracks=true&timezoneoffset=60"
